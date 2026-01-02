@@ -1,0 +1,114 @@
+Company_master
+
+
+CREATE TABLE company_master (
+    id BIGSERIAL PRIMARY KEY,
+    company_name VARCHAR(200) NOT NULL,
+    address TEXT NOT NULL,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    state_code VARCHAR(5),
+    gstin VARCHAR(20),
+    phone VARCHAR(20),
+    email VARCHAR(100),
+    website VARCHAR(100),
+    logo_url TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+2️⃣ bank_details
+
+👉 Invoice ke niche bank section ke liye
+
+CREATE TABLE bank_details (
+    id BIGSERIAL PRIMARY KEY,
+    company_id BIGINT NOT NULL,
+    bank_name VARCHAR(150),
+    branch VARCHAR(150),
+    account_no VARCHAR(30),
+    ifsc_code VARCHAR(20),
+    pan VARCHAR(20),
+    tan VARCHAR(20),
+    FOREIGN KEY (company_id) REFERENCES company_master(id)
+);
+
+3️⃣ client_master
+
+👉 Bill To / Ship To Party
+
+CREATE TABLE client_master (
+    id BIGSERIAL PRIMARY KEY,
+    client_name VARCHAR(200) NOT NULL,
+    billing_address TEXT NOT NULL,
+    shipping_address TEXT,
+    gstin VARCHAR(20),
+    state VARCHAR(100),
+    state_code VARCHAR(5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+4️⃣ service_rate_master
+
+👉 Resource / Hourly rate (Ajinkya, Joshi)
+
+CREATE TABLE service_rate_master (
+    id BIGSERIAL PRIMARY KEY,
+    resource_name VARCHAR(150),
+    role VARCHAR(100),
+    rate_per_hour NUMERIC(10,2),
+    gst_percentage NUMERIC(5,2),
+    active BOOLEAN DEFAULT TRUE
+);
+
+5️⃣ invoice
+
+👉 Main invoice header table
+
+CREATE TABLE invoice (
+    id BIGSERIAL PRIMARY KEY,
+    invoice_no VARCHAR(50) UNIQUE NOT NULL,
+    invoice_date DATE NOT NULL,
+    company_id BIGINT,
+    client_id BIGINT,
+    reverse_charge BOOLEAN DEFAULT FALSE,
+    subtotal NUMERIC(12,2),
+    gst_amount NUMERIC(12,2),
+    total_amount NUMERIC(12,2),
+    status VARCHAR(20) DEFAULT 'DRAFT',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES company_master(id),
+    FOREIGN KEY (client_id) REFERENCES client_master(id)
+);
+
+6️⃣ invoice_items
+
+👉 Invoice ke andar rows
+
+CREATE TABLE invoice_items (
+    id BIGSERIAL PRIMARY KEY,
+    invoice_id BIGINT NOT NULL,
+    resource_name VARCHAR(150),
+    service_period VARCHAR(100),
+    working_hours INTEGER,
+    rate_per_hour NUMERIC(10,2),
+    amount NUMERIC(12,2),
+    gst_amount NUMERIC(12,2),
+    total_amount NUMERIC(12,2),
+    FOREIGN KEY (invoice_id) REFERENCES invoice(id)
+);
+
+7️⃣ invoice_sequence
+
+👉 Invoice number generate karne ke liye (BEST PRACTICE)
+
+CREATE TABLE invoice_sequence (
+    id BIGSERIAL PRIMARY KEY,
+    financial_year VARCHAR(10),
+    last_number INTEGER
+);
+
+🔹 ER RELATIONSHIP (TEXT VIEW)
+Company ──┬── BankDetails
+          └── Invoice ──┬── InvoiceItems
+                         └── Client
