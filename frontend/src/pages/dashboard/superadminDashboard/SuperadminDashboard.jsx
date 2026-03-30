@@ -13,7 +13,7 @@ const [companyCount, setCompanyCount] = useState(0);
     const fetchCompanyCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8080/super-admin/companies-count",
+          "http://localhost:8080/api/super-admin/companies-count",
           {
             method: "GET",
             headers: {

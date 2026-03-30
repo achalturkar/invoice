@@ -36,16 +36,16 @@ export const createClient = async (companyId, data) => {
 };
 
 // UPDATE
-export const updateClient = async (companyId, id, data) => {
+export const updateClient = async (companyId, clientId, payload) => {
   const res = await fetch(
-    `${BASE_URL}/${companyId}/clients/${id}`,
+    `${BASE_URL}/${companyId}/clients/${clientId}`,
     {
       method: "PUT",
       headers: authHeader(),
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     }
   );
-  if (!res.ok) throw new Error("Update failed");
+  if (!res.ok) throw new Error("Failed to update client");
   return res.json();
 };
 
@@ -60,3 +60,6 @@ export const deleteClient = async (companyId, id) => {
   );
   if (!res.ok) throw new Error("Delete failed");
 };
+
+
+

@@ -7,7 +7,7 @@ const ListCompanies = () => {
   const fetchAllCompanies = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8080/super-admin/all-companies",
+        "http://localhost:8080/api/super-admin/all-companies",
         {
           method: "GET",
           headers: {

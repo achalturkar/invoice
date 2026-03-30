@@ -19,4 +19,8 @@ public class CreateCompanyRequest {
     private String stateCode;
     private String gstNo;
     private String panNo;
+    private String lutNo;
+    private String cinNo;
+
+
 }

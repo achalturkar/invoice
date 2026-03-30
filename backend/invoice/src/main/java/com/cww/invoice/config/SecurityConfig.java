@@ -48,17 +48,30 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // Public
-                        .requestMatchers("/auth/login", "/auth/refresh", "/auth/logout").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/location/**").permitAll()
+
+                        // ✅ Swagger URLs allow
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        .requestMatchers("/api/companies/leaveFile/**").permitAll()
 
                         // Role based
-                        .requestMatchers("/super-admin/**").hasRole("SUPER_ADMIN")
-                        .requestMatchers("/company-admin/**").hasRole("COMPANY_ADMIN")
+                        .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/api/company-admin/**").hasRole("COMPANY_ADMIN")
 
                         .requestMatchers("/uploads/**").permitAll()
 
+                        .requestMatchers(
+                                "/api/company/*/image/**"
+                        ).permitAll()
+
 
                         // Authenticated
-                        .requestMatchers("/auth/me").authenticated()
+                        .requestMatchers("/api/auth/me").authenticated()
 
                         // Default
                         .anyRequest().authenticated()

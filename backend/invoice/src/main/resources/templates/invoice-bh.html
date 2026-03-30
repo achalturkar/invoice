@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Tax Invoice</title>
+
+  <style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+        color: #000;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 12mm;
+    }
+
+    .invoice-box {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    td, th {
+        border: 1px solid #000;
+        padding: 5px;
+        vertical-align: top;
+        word-wrap: break-word;
+    }
+
+     .no-border td{
+     border : none;
+     }
+
+    .center { text-align: center; }
+    .right { text-align: right; }
+    .bold { font-weight: bold; }
+
+    .company-name {
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .company-info {
+        text-align: center;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .title {
+        background: #dbe5f1;
+        font-weight: bold;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .section {
+        background: #dbe5f1;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .signature {
+        height: 70px;
+    }
+
+    .footer {
+        font-size: 11px;
+        text-align: center;
+        margin-top: 8px;
+    }
+
+     /* Bank section special handling */
+.bank-wrapper {
+    border: none;
+}
+
+.bank-wrapper td {
+    border: 1px solid #000;
+}
+
+.bank-wrapper tr:first-child td {
+    background: #e9eff6;
+    font-weight: bold;
+    text-align: center;
+}
+  </style>
+</head>
+
+<body>
+
+<div class="invoice-box">
+
+  <!-- ================= HEADER ================= -->
+  <table class="no-border" style="width:100%;">
+    <tr>
+
+      <!-- LEFT: Company Details -->
+      <td style="width:70%; vertical-align:top;">
+        <div class="company-name" style="text-align:left;"
+             th:text="${company.name}">
+        </div>
+
+        <div class="company-info" style="text-align:left;">
+          <span th:text="${company.address}"></span><br/>
+          Ph: <span th:text="${company.phone}"></span> |
+          <span th:text="${company.email}"></span><br/>
+          <span th:text="${company.webUrl}"></span><br/>
+          <b>GSTIN:</b> <span th:text="${company.gstNo}"></span>
+        </div>
+      </td>
+
+      <!-- RIGHT: Logo -->
+      <td style="width:30%; text-align:right; vertical-align:top;">
+        <img th:if="${logoPath != null}"
+             th:src="${logoPath}"
+             style="max-height:80px; max-width:180px;"/>
+      </td>
+
+
+    </tr>
+  </table>
+
+
+  <!-- ================= TITLE ================= -->
+  <table>
+    <tr>
+      <td class="title">TAX INVOICE</td>
+    </tr>
+  </table>
+
+  <!-- ================= META ================= -->
+  <table>
+    <tr>
+      <td class="bold">Invoice No:</td>
+      <td th:text="${invoice.invoiceNumber}"></td>
+      <td class="bold">Invoice Date:</td>
+      <td th:text="${#temporals.format(invoice.invoiceDate, 'dd-MM-yyyy')}"></td>
+    </tr>
+    <tr>
+      <td class="bold">Reverse Charge (Y/N):</td>
+      <td th:text="${invoice.reverseCharge ? 'Y' : 'N'}"></td>
+      <td class="bold">State:</td>
+      <td>
+        <span th:text="${company.state}"></span>
+        (Code: <span th:text="${company.stateCode}"></span>)
+      </td>
+    </tr>
+  </table>
+
+  <!-- ================= BILL / SHIP ================= -->
+  <!-- ================= BILL / SHIP ================= -->
+  <table>
+    <tr class="section">
+      <td>Bill To Party</td>
+      <td>Ship To Party</td>
+    </tr>
+
+    <tr>
+      <!-- BILLING -->
+      <td style="padding:0;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="border-bottom:1px solid #000;">
+              <b>Name :</b>
+              <span th:text="${client.clientName}"></span>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="border-bottom:1px solid #000;">
+              <b>Address :</b><br/>
+              <span th:text="${billingAddress.addressLine1}"></span>
+              <span th:text="${billingAddress.city}"></span>,
+              <span th:text="${billingAddress.state.stateName}"></span>
+              - <span th:text="${billingAddress.pincode}"></span>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="border-bottom:1px solid #000;">
+              <b>State :</b>
+              <span th:text="${billingAddress.state.stateName}"></span>
+              (Code:
+              <span th:text="${billingAddress.state.gstStateCode}"></span>)
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <b>GSTIN :</b>
+              <span th:text="${client.gstNo}"></span>
+            </td>
+          </tr>
+        </table>
+      </td>
+
+      <!-- SHIPPING -->
+      <td style="padding:0;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="border-bottom:1px solid #000;">
+              <b>Name :</b>
+              <span th:text="${client.clientName}"></span>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="border-bottom:1px solid #000;">
+              <b>Address :</b><br/>
+              <span th:text="${shippingAddress.addressLine1}"></span>
+              <span th:text="${shippingAddress.city}"></span>,
+              <span th:text="${shippingAddress.state.stateName}"></span>
+              - <span th:text="${shippingAddress.pincode}"></span>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="border-bottom:1px solid #000;">
+              <b>State :</b>
+              <span th:text="${shippingAddress.state.stateName}"></span>
+              (Code:
+              <span th:text="${shippingAddress.state.gstStateCode}"></span>)
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <b>GSTIN :</b>
+              <span th:text="${client.gstNo}"></span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+
+<!--  <table>-->
+<!--    <tr class="section">-->
+<!--      <td> <b>HSN/SAC:</b> <span th:text="${invoice.poNumber}"></span><br/> </td>-->
+<!--      &lt;!&ndash;            <td> <b>HSC/SAC:</b> <span th:text="${}"></span><br/></td>&ndash;&gt;-->
+<!--    </tr>-->
+<!--  </table>-->
+
+  <!-- ================= ITEMS ================= -->
+  <table>
+    <tr class="section">
+      <td width="5%">Sr</td>
+      <td width="25%">Name of Resource</td>
+      <td width="10%">HSN/SAC</td>
+      <td width="10%">Price (INR)</td>
+      <td width="10%">GST (18%)</td>
+      <td width="25%">Total Amount (INR)</td>
+    </tr>
+
+    <tr th:each="item, i : ${invoice.items}">
+      <td class="center" th:text="${i.count}"></td>
+      <td th:text="${item.resourceName}" ></td>
+<!--      <td class="right" th:text="${item.workingHours}"></td>-->
+            <td class="right" th:text="${invoice.poNumber}"></td>
+      <td class="right" th:text="${item.ratePerHour}"></td>
+      <td class="right" th:text="${invoice.taxAmount}"></td>
+      <td class="right" th:text="${invoice.totalAmount}"></td>
+    </tr>
+
+    <tr class="bold">
+      <td colspan="2" class="right">Total</td>
+      <td  class="right"></td>
+      <td  class="right"></td>
+
+      <td class="right"  th:text="${invoice.taxAmount}"></td>
+      <td class="right" th:text="${invoice.totalAmount}"></td>
+    </tr>
+  </table>
+
+  <!-- ================= TAX ================= -->
+  <table>
+    <tr>
+      <td class="right bold">CGST(9%)</td>
+      <td class="right" th:text="${invoice.cgstAmount}"></td>
+    </tr>
+    <tr>
+      <td class="right bold">SGST(9%)</td>
+      <td class="right" th:text="${invoice.sgstAmount}"></td>
+    </tr>
+    <tr>
+      <td class="right bold">Total Tax Amount</td>
+      <td class="right" th:text="${invoice.taxAmount}"></td>
+    </tr>
+    <tr class="bold">
+      <td class="right">Total Invoice Amount</td>
+      <td class="right" th:text="${invoice.totalAmount}"></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="bold">
+        Invoice Amount in Words:
+        <span th:text="${amountInWords}"></span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ================= BANK ================= -->
+
+  <table class="bank-wrapper">
+    <tr>
+      <td>Bank Details</td>
+      <td>For <span th:text="${company.name}"></span></td>
+    </tr>
+    <tr>
+      <td>
+        <b>Bank Name:</b> <span th:text="${bankAccount.bankName}"></span><br/>
+        <b>Branch:</b> <span th:text="${bankAccount.bankBranch}"></span><br/>
+        <b>Account No:</b> <span th:text="${bankAccount.bankAccountNo}"></span><br/>
+        <b>IFSC:</b> <span th:text="${bankAccount.bankIfsc}"></span><br/>
+        <b>Account Holder:</b> <span th:text="${bankAccount.bankAccountName}"></span><br/>
+<!--        <b>SWIFT:</b> <span th:text="${bankAccount.swiftCode}"></span><br/>-->
+<!--        <b>PAN:</b> <span th:text="${bankAccount.panNo}"></span><br/>-->
+<!--        <b>TAN:</b> <span th:text="${bankAccount.tanNo}"></span>-->
+      </td>
+      <td class="center">
+        <img th:if="${signPath != null}" th:src="${signPath}" class="signature"/><br/>
+        <b>Authorised Signatory</b>
+      </td>
+    </tr>
+  </table>
+
+
+
+  <!-- ================= FOOTER ================= -->
+  <div class="footer">
+    Certified that the particulars given above are true and correct.<br/>
+    Thanks for doing business With us!
+  </div>
+
+</div>
+</body>
+</html>
+

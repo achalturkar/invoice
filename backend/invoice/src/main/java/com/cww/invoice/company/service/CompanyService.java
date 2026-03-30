@@ -1,17 +1,33 @@
 package com.cww.invoice.company.service;
 
 
+import com.cww.invoice.client.mapper.ClientAddressMapper;
+import com.cww.invoice.common.dto.ImageResponse;
 import com.cww.invoice.common.storage.StorageService;
 import com.cww.invoice.company.dto.CompanyResponseDto;
 import com.cww.invoice.company.dto.CompanyUpdateDto;
 import com.cww.invoice.company.entity.Company;
+import com.cww.invoice.company.entity.CompanyStatus;
+import com.cww.invoice.company.mapper.CompanyAddressMapper;
 import com.cww.invoice.company.repository.CompanyRepository;
+import com.cww.invoice.invoice.dto.FileResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,6 +38,9 @@ public class CompanyService {
 
     @Autowired
     private StorageService storageService;
+
+    @Value("${app.storage.root}")
+    private String storageRoot;
 
     @Value("${app.storage.company.logo}")
     private String logoFolder;
@@ -37,25 +56,29 @@ public class CompanyService {
             String type,
             MultipartFile file
     ) {
+
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        String folder = switch (type) {
-            case "logo" -> logoFolder;
-            case "stamp" -> stampFolder;
-            case "sign" -> signFolder;
+        String path = storageService.uploadCompanyAsset(
+                file,
+                companyId.toString(),
+                type
+        );
+
+        switch (type.toLowerCase()) {
+            case "logo" -> company.setLogoPath(path);
+            case "stamp" -> company.setStampPath(path);
+            case "sign" -> company.setSignPath(path);
             default -> throw new RuntimeException("Invalid type");
-        };
-
-        String imageUrl = storageService.upload(file, folder);
-
-        if (type.equals("logo")) company.setLogo_url(imageUrl);
-        if (type.equals("stamp")) company.setStamp_url(imageUrl);
-        if (type.equals("sign")) company.setSign_url(imageUrl);
+        }
 
         companyRepository.save(company);
-        return mapToDto(company);
+
+        return mapToDto(company); // ✅ IMPORTANT
     }
+
+
 
 
     // VIEW PROFILE
@@ -66,6 +89,42 @@ public class CompanyService {
         return mapToDto(company);
     }
 
+    public ImageResponse getCompanyImage(UUID companyId, String type) throws IOException {
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        String imagePath = switch (type) {
+            case "logo" -> company.getLogoPath();
+            case "stamp" -> company.getStampPath();
+            case "sign" -> company.getSignPath();
+            default -> throw new RuntimeException("Invalid image type");
+        };
+
+        if (imagePath == null)
+            throw new RuntimeException("Image not uploaded");
+
+        Path path = Paths.get(storageRoot).resolve(imagePath);
+        Resource resource = new UrlResource(path.toUri());
+
+        if (!resource.exists())
+            throw new RuntimeException("Image not found");
+
+        String contentType = Files.probeContentType(path);
+
+        return new ImageResponse(resource, contentType);
+    }
+
+
+
+    public void updateCompanyStatus(UUID companyId, CompanyStatus status) {
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        company.setStatus(status);
+        companyRepository.save(company);
+    }
 
 
     // UPDATE PROFILE
@@ -82,13 +141,26 @@ public class CompanyService {
         company.setStateCode(dto.getStateCode());
         company.setGstNo(dto.getGstNo());
         company.setPanNo(dto.getPanNo());
-        company.setLogo_url(dto.getLogoUrl());
-        company.setStamp_url(dto.getStampUrl());
-        company.setSign_url(dto.getSignUrl());
+        company.setLutNo(dto.getLutNo());
+        company.setCinNo(dto.getCinNo());
+//        company.setLogoPath(dto.getLogoPath());
+//        company.setStampPath(dto.getStampPath());
+//        company.setSignPath(dto.getSignPath());
+        company.setCompanyCode(dto.getCompanyCode());
+
 
         companyRepository.save(company);
         return mapToDto(company);
     }
+
+    @Transactional
+    public void updateStatus(UUID companyId, CompanyStatus status) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        company.setStatus(status);
+    }
+
 
     private CompanyResponseDto mapToDto(Company company) {
         CompanyResponseDto dto = new CompanyResponseDto();
@@ -102,10 +174,38 @@ public class CompanyService {
         dto.setStateCode(company.getStateCode());
         dto.setGstNo(company.getGstNo());
         dto.setPanNo(company.getPanNo());
-        dto.setLogoUrl(company.getLogo_url());
-        dto.setStampUrl(company.getStamp_url());
-        dto.setSignUrl(company.getSign_url());
+        dto.setLutNo(company.getLutNo());
+        dto.setCinNo(company.getCinNo());
+//        dto.setLogoPath(company.getLogoPath());
+//        dto.setStampPath(company.getStampPath());
+//        dto.setSignPath(company.getSignPath());
+        // ✅ Dynamic image URLs (NOT stored in DB)
+        dto.setLogoPath(
+                company.getLogoPath() == null
+                        ? null
+                        : "/api/company/" + company.getId() + "/image/logo"
+        );
+
+        dto.setStampPath(
+                company.getStampPath() == null
+                        ? null
+                        : "/api/company/" + company.getId() + "/image/stamp"
+        );
+
+        dto.setSignPath(
+                company.getSignPath() == null
+                        ? null
+                        : "/api/company/" + company.getId() + "/image/sign"
+        );
+
+        dto.setCompanyCode(company.getCompanyCode());
+
+//        dto.setCompanyAddressResponseDTO();
+
+
         return dto;
     }
+
+
 }
 

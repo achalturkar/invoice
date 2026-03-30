@@ -13,7 +13,7 @@ const CreateCompanyWithAdmin = () => {
 
     try {
       await axios.post(
-        "http://localhost:8080/super-admin/create-company-with-admin",
+        "http://localhost:8080/api/super-admin/create-company-with-admin",
         form,
         {
           headers: {
@@ -38,7 +38,7 @@ const CreateCompanyWithAdmin = () => {
 
       <input name="companyName" placeholder="Company Name" onChange={handleChange} required />
       <input name="companyEmail" placeholder="Company Email" onChange={handleChange} required />
-      <input name="companyPhone" placeholder="Company Phone" onChange={handleChange} />
+      <input name="companyPhone" placeholder="Company Phone" onChange={handleChange} required />
       <input name="state" placeholder="State" onChange={handleChange} />
       <input name="stateCode" placeholder="State Code" onChange={handleChange} />
       <input name="gstNo" placeholder="GST No" onChange={handleChange} />

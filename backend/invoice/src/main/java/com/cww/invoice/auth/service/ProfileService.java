@@ -22,7 +22,9 @@ public class ProfileService {
                 user.getPhone(),
                 user.getCompany() != null ? user.getCompany().getName() : "Super Admin",
                 user.getRole().name(),
-                user.getCompany().getId().toString()
+                user.getCompany() != null
+                        ? user.getCompany().getId().toString()
+                        : null
         );
     }
 }

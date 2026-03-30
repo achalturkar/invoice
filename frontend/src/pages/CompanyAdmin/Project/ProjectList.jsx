@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CompanyAdminLayout from "../../../layout/CompanyAdminLayout/CompanyAdminLayout";
 import { getProjects } from "../../../api/projectApi";
+import { useAuth } from "../../../auth/AuthContext";
 
 
 export default function ProjectList() {
-  const companyId = localStorage.getItem("companyId");
   const [projects, setProjects] = useState([]);
+
+   const {auth} = useAuth();
+    const companyId = auth?.companyId;
 
   useEffect(() => {
     getProjects(companyId).then(setProjects);
@@ -14,7 +17,7 @@ export default function ProjectList() {
 
   return (
     <CompanyAdminLayout>
-      <div className="bg-white p-6 rounded-xl shadow">
+      {/* <div className="bg-white p-6 rounded-xl shadow"> */}
         <div className="flex justify-between mb-4">
           <h2 className="text-xl font-bold">Projects</h2>
           <Link
@@ -50,7 +53,7 @@ export default function ProjectList() {
             ))}
           </tbody>
         </table>
-      </div>
+      {/* </div> */}
     </CompanyAdminLayout>
   );
 }

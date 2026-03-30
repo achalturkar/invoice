@@ -14,8 +14,13 @@ public class CompanyUpdateDto {
     private String stateCode;
     private String gstNo;
     private String panNo;
-    private String logoUrl;
-    private String stampUrl;
-    private String signUrl;
+    private String lutNo;
+    private String cinNo;
+
+
+    //    private String logoPath;
+//    private String stampPath;
+//    private String signPath;
+    private String companyCode;
 }
 

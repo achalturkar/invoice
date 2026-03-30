@@ -40,5 +40,26 @@ export const uploadCompanyImage = async (companyId, type, file) => {
       body: formData,
     }
   );
-  return res.json();
+
+  if (!res.ok) throw new Error("Image upload failed");
+  return res.json(); 
 };
+
+
+export const getCompanyLogo = async (companyId) => {
+  const res = await fetch(
+    `${BASE_URL}/company/${companyId}/image/logo`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch logo");
+  }
+
+  return res.blob(); // ✅ blob return karo
+};
+

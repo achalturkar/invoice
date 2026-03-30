@@ -17,6 +17,7 @@ public class CreateCompanyWithAdminRequest {
     private String gstNo;
     private String panNo;
 
+
     // -------- Company Admin --------
     private String adminName;
     private String adminEmail;

@@ -1,11 +1,15 @@
 package com.cww.invoice.superadmin.controller;
 
 
+import com.cww.invoice.company.dto.CompanyResponseDto;
 import com.cww.invoice.company.dto.CreateCompanyRequest;
 import com.cww.invoice.company.dto.CreateCompanyWithAdminRequest;
 import com.cww.invoice.company.entity.Company;
+import com.cww.invoice.company.entity.CompanyStatus;
+import com.cww.invoice.company.service.CompanyService;
 import com.cww.invoice.companyadmin.dto.CreateCompanyAdminRequest;
 import com.cww.invoice.superadmin.service.SuperAdminService;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +20,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/super-admin")
+@RequestMapping("/api/super-admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SUPER_ADMIN')")
 public class SuperAdminController {
 
     private final SuperAdminService superAdminService;
 
-
-
+    private final CompanyService companyService;
 
     // Create Company
     @PostMapping("/companies")
@@ -43,7 +46,8 @@ public class SuperAdminController {
 
     // List of All Companies
     @GetMapping("/all-companies")
-    public List<Company> getAllCompany(){
+    @PermitAll
+    public List<CompanyResponseDto> getAllCompany(){
         return superAdminService.findAllCompanies();
     }
 
@@ -61,4 +65,20 @@ public class SuperAdminController {
     ) {
         return superAdminService.createCompanyAdmin(companyId, request);
     }
+
+    @DeleteMapping("/companies/{companyId}")
+    public void deleteCompany(@PathVariable UUID companyId){
+        superAdminService.deleteCompany(companyId);
+    }
+
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PutMapping("/companies/{companyId}/status")
+    public void updateCompanyStatus(
+            @PathVariable UUID companyId,
+            @RequestParam CompanyStatus status
+    ) {
+        companyService.updateStatus(companyId, status);
+    }
+
+
 }

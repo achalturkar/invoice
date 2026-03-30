@@ -1,0 +1,38 @@
+ location                👈 SEPARATE MASTER MODULE
+│   ├── controller
+│   │   ├── LocationController.java
+│   │   └── AdminLocationController.java
+│   │
+│   ├── dto
+│   │   ├── CountryDto.java
+│   │   ├── StateDto.java
+│   │   ├── DistrictDto.java
+│   │   ├── TalukaDto.java
+│   │   └── PincodeDto.java
+│   │
+│   ├── entity
+│   │   ├── Country.java
+│   │   ├── State.java
+│   │   ├── District.java
+│   │   ├── Taluka.java
+│   │   └── Pincode.java
+│   │
+│   ├── repository
+│   │   ├── CountryRepository.java
+│   │   ├── StateRepository.java
+│   │   ├── DistrictRepository.java
+│   │   ├── TalukaRepository.java
+│   │   └── PincodeRepository.java
+│   │
+│   ├── service
+│   │   ├── LocationService.java
+│   │   └── AdminLocationService.java
+│   │
+│   ├── mapper
+│   │   └── LocationMapper.java
+│   │
+│   ├── validator
+│   │   └── LocationValidator.java
+│   │
+│   └── util
+│       └── CsvUploadUtil.java

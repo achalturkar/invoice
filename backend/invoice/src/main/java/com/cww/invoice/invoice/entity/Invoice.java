@@ -1,6 +1,5 @@
 package com.cww.invoice.invoice.entity;
 
-import com.cww.invoice.candidate.entity.Candidate;
 import com.cww.invoice.client.entity.Client;
 import com.cww.invoice.common.entity.BaseEntity;
 import com.cww.invoice.company.entity.Company;
@@ -11,6 +10,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,30 +24,65 @@ public class Invoice extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    private Company company;
+    /* ================= BASIC ================= */
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    private Client client;
-
-    @ManyToOne
-    @JoinColumn(name = "candidate_id", nullable = true)
-    private Candidate candidate;
-
+    @Column(nullable = false, unique = true)
     private String invoiceNumber;
+
+//    @Column(nullable = false)
+    private Long sequenceNumber;
+
+
     private LocalDate invoiceDate;
     private LocalDate dueDate;
-
-    private BigDecimal subtotal;
-    private BigDecimal gstAmount;
-    private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
     private InvoiceStatus status;
 
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
-    private List<InvoiceItem> items;
+    /* ================= AMOUNTS ================= */
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal subTotal;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal cgstAmount;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal sgstAmount;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal taxAmount;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal totalAmount;
+
+    /* ================= GST FLAGS ================= */
+
+    private boolean gstApplicable;
+
+    private boolean reverseCharge = false; // Y / N
+
+    private String poNumber;
+
+    /* ================= PDF ================= */
+
+    private String pdfPath;
+
+    /* ================= RELATIONS ================= */
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "company_id")
+    private Company company;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "client_id")
+    private Client client;
+
+    @OneToMany(
+            mappedBy = "invoice",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<InvoiceItem> items = new ArrayList<>();
 }
 

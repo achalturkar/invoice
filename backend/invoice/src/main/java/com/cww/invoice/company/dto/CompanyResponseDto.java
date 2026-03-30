@@ -2,6 +2,8 @@ package com.cww.invoice.company.dto;
 
 
 import lombok.Data;
+
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -16,8 +18,14 @@ public class CompanyResponseDto {
     private String stateCode;
     private String gstNo;
     private String panNo;
-    private String logoUrl;
-    private String stampUrl;
-    private String signUrl;
+    private String lutNo;
+    private String cinNo;
+
+    private String logoPath;
+    private String stampPath;
+    private String signPath;
+    private String companyCode;
+
+    private List<CompanyAddressResponseDTO> companyAddress;
 }
 

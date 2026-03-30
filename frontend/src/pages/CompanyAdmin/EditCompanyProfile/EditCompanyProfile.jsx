@@ -1,200 +1,72 @@
-// import React, { useEffect, useState } from "react";
-// import CompanyAdminLayout from "../../../layout/CompanyAdminLayout/CompanyAdminLayout";
-// import { getLoggedInUser } from "../../../api/authApi";
-// import { getCompanyById, updateCompanyById } from "../../../api/companyApi";
-// import { useNavigate } from "react-router-dom";
-
-// const EditCompanyProfile = () => {
-//   const [companyId, setCompanyId] = useState(null);
-//   const [form, setForm] = useState(null);
-//   const [files, setFiles] = useState({
-//     logo: null,
-//     stamp: null,
-//     sign: null,
-//   });
-
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const loadData = async () => {
-//       try {
-//         const user = await getLoggedInUser();
-//         setCompanyId(user.company);
-//         setForm(await getCompanyById(user.company));
-//       } catch {
-//         alert("Session expired");
-//       }
-//     };
-//     loadData();
-//   }, []);
-
-//   const handleChange = (e) =>
-//     setForm({ ...form, [e.target.name]: e.target.value });
-
-//   const handleFileChange = (e) =>
-//     setFiles({ ...files, [e.target.name]: e.target.files[0] });
-
-//   const handleSubmit = async () => {
-//     await updateCompanyById(companyId, form);
-//     alert("Company profile updated successfully");
-//     navigate("/company-admin/profile")
-    
-//   };
-
-//   if (!form) return <p>Loading...</p>;
-
-//   return (
-//     <CompanyAdminLayout>
-//       <div className="max-w-6xl mx-auto bg-white shadow rounded-xl p-6 space-y-8">
-
-//         <h2 className="text-2xl font-bold text-gray-800">
-//           Edit Company Profile
-//         </h2>
-
-//         {/* BASIC INFO */}
-//         <Section title="Basic Information">
-//           <Input name="name" label="Company Name" value={form.name} onChange={handleChange} />
-//           <Input name="email" label="Email" value={form.email} onChange={handleChange} />
-//           <Input name="phone" label="Phone" value={form.phone} onChange={handleChange} />
-//           <Input name="webUrl" label="Website" value={form.webUrl} onChange={handleChange} />
-//           <Textarea name="address" label="Address" value={form.address} onChange={handleChange} />
-//         </Section>
-
-//         {/* LEGAL INFO */}
-//         <Section title="Legal Information">
-//           <Input name="gstNo" label="GST Number" value={form.gstNo} onChange={handleChange} />
-//           <Input name="panNo" label="PAN Number" value={form.panNo} onChange={handleChange} />
-//           <Input name="state" label="State" value={form.state} onChange={handleChange} />
-//           <Input name="stateCode" label="State Code" value={form.stateCode} onChange={handleChange} />
-//         </Section>
-
-//         {/* FILE UPLOAD */}
-//         <Section title="Branding & Authorization">
-//           <FileInput label="Company Logo" name="logo" onChange={handleFileChange} />
-//           <FileInput label="Company Stamp" name="stamp" onChange={handleFileChange} />
-//           <FileInput label="Authorized Signature" name="sign" onChange={handleFileChange} />
-//         </Section>
-
-//         {/* ACTION */}
-//         <div className="flex justify-end gap-3">
-//           <button
-//             onClick={handleSubmit}
-//             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-
-//           >
-//             Save Changes
-//           </button>
-//         </div>
-//       </div>
-//     </CompanyAdminLayout>
-//   );
-// };
-
-// /* =================== REUSABLE COMPONENTS =================== */
-
-// const Section = ({ title, children }) => (
-//   <div>
-//     <h3 className="text-sm font-semibold text-gray-700 mb-4">
-//       {title}
-//     </h3>
-//     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//       {children}
-//     </div>
-//   </div>
-// );
-
-// const Input = ({ label, ...props }) => (
-//   <div>
-//     <label className="block text-xs text-gray-500 mb-1">{label}</label>
-//     <input
-//       {...props}
-//       className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-//     />
-//   </div>
-// );
-
-// const Textarea = ({ label, ...props }) => (
-//   <div className="md:col-span-2">
-//     <label className="block text-xs text-gray-500 mb-1">{label}</label>
-//     <textarea
-//       {...props}
-//       rows="3"
-//       className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-//     />
-//   </div>
-// );
-
-// const FileInput = ({ label, ...props }) => (
-//   <div>
-//     <label className="block text-xs text-gray-500 mb-1">{label}</label>
-//     <input
-//       type="file"
-//       {...props}
-//       className="w-full text-sm"
-//     />
-//   </div>
-// );
-
-// export default EditCompanyProfile;
-
 import React, { useEffect, useState } from "react";
 import CompanyAdminLayout from "../../../layout/CompanyAdminLayout/CompanyAdminLayout";
 import { getLoggedInUser } from "../../../api/authApi";
 import {
   getCompanyById,
   updateCompanyById,
-  uploadCompanyImage,
 } from "../../../api/companyApi";
-import ImageUploadBox from "../ImageUploadBox/ImageUploadBox";
-
-/* ===================== MAIN COMPONENT ===================== */
+import { useNavigate } from "react-router-dom";
+import LocationForm from "../../../components/common/LocationForm/LocationForm";
+import { useAuth } from "../../../auth/AuthContext";
 
 const EditCompanyProfile = () => {
   const [companyId, setCompanyId] = useState(null);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  const navigate = useNavigate();
+
+  const {auth} =useAuth();
+
   useEffect(() => {
     const load = async () => {
-      try {
-        const user = await getLoggedInUser();
-        setCompanyId(user.company);
-        const company = await getCompanyById(user.company);
-        setForm(company);
-      } catch (err) {
-        console.error(err);
-        alert("Failed to load company profile");
-      }
+      // const user = await getLoggedInUser();
+      setCompanyId(auth?.companyId);
+
+      const company = await getCompanyById(auth?.companyId);
+      setForm(company);
     };
     load();
   }, []);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
-      await updateCompanyById(companyId, form);
+
+      const payload = {
+        name: form.name,
+        companyCode: form.companyCode,
+        email: form.email,
+        phone: form.phone,
+        webUrl: form.webUrl,
+        address: form.address,
+        gstNo: form.gstNo,
+        panNo: form.panNo,
+        lutNo: form.lutNo,
+        cinNo : form.cinNo,
+        state: form.state,
+        stateCode: form.stateCode,
+      };
+
+      await updateCompanyById(companyId, payload);
       alert("Company profile updated successfully ✅");
-    } catch (err) {
-      console.error(err);
-      alert("Update failed");
+      navigate("/company-admin/profile");
+    } catch {
+      alert("Failed to save changes");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleUpload = async (type, file) => {
-    const updatedCompany = await uploadCompanyImage(companyId, type, file);
-    setForm(updatedCompany); // refresh image URLs
-  };
-
   if (!form) {
     return (
       <CompanyAdminLayout>
-        <div className="flex justify-center items-center h-40 text-gray-500">
+        <div className="flex justify-center items-center h-60 text-gray-500">
           Loading company profile...
         </div>
       </CompanyAdminLayout>
@@ -203,106 +75,78 @@ const EditCompanyProfile = () => {
 
   return (
     <CompanyAdminLayout>
-      <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow space-y-10">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow p-8 space-y-10">
 
-        <h2 className="text-xl font-bold text-gray-800">
-          Edit Company Profile
-        </h2>
+        {/* HEADER */}
+        <div className="border-b pb-4">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Edit Company Profile
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage your organization’s master information used across invoices and reports
+          </p>
+        </div>
 
-        {/* BASIC INFORMATION */}
-        <Section title="Basic Information">
+        {/* BASIC INFO */}
+        <Section title="Company Information">
           <Input
             name="name"
             label="Company Name"
             value={form.name || ""}
             onChange={handleChange}
           />
-          <Input
-            name="email"
-            label="Email"
-            value={form.email || ""}
-            onChange={handleChange}
-          />
-          <Input
-            name="phone"
-            label="Phone"
-            value={form.phone || ""}
-            onChange={handleChange}
-          />
-          <Input
-            name="webUrl"
-            label="Website"
-            value={form.webUrl || ""}
-            onChange={handleChange}
-          />
-          <Textarea
-            name="address"
-            label="Address"
-            value={form.address || ""}
-            onChange={handleChange}
-          />
+
+          {/* COMPANY CODE – SPECIAL UX */}
+          <div>
+            <label className="text-xs text-gray-500">Company Code</label>
+
+            <input
+              name="companyCode"
+              value={form.companyCode || ""}
+              onChange={handleChange}
+              className="w-full border rounded-xl px-3 py-2.5 text-sm font-semibold tracking-wide focus:ring-2 focus:ring-indigo-500 outline-none"
+            />
+
+            <div className="mt-2 flex items-start gap-2">
+              <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">
+                Invoice
+              </span>
+              <p className="text-xs text-red-500 leading-relaxed">
+                This code will be displayed on all invoices and bills
+                
+                Use a short, unique identifier (e.g. BHV, ACME, INFRA01).
+              </p>
+            </div>
+          </div>
+
+          <Input name="email" label="Email" value={form.email || ""} onChange={handleChange} />
+          <Input name="phone" label="Phone" value={form.phone || ""} onChange={handleChange} />
+          <Input name="webUrl" label="Website" value={form.webUrl || ""} onChange={handleChange} />
+          <Textarea name="address" label="Registered Address" value={form.address || ""} onChange={handleChange} />
         </Section>
 
-        {/* LEGAL DETAILS */}
-        <Section title="Legal Details">
-          <Input
-            name="gstNo"
-            label="GST Number"
-            value={form.gstNo || ""}
-            onChange={handleChange}
-          />
-          <Input
-            name="panNo"
-            label="PAN Number"
-            value={form.panNo || ""}
-            onChange={handleChange}
-          />
-          <Input
-            name="state"
-            label="State"
-            value={form.state || ""}
-            onChange={handleChange}
-          />
-          <Input
-            name="stateCode"
-            label="State Code"
-            value={form.stateCode || ""}
-            onChange={handleChange}
-          />
+        {/* LEGAL */}
+        <Section title="Legal & Tax Information">
+          <Input name="gstNo" label="GST Number" value={form.gstNo || ""} onChange={handleChange} />
+          <Input name="panNo" label="PAN Number" value={form.panNo || ""} onChange={handleChange} />
+          <Input name="lutNo" label="LUT Number" value={form.lutNo || ""} onChange={handleChange} />
+          <Input name="cinNo" label="CIN Number" value={form.cinNo || ""} onChange={handleChange} />
+          <Input name="state" label="State" value={form.state || ""} onChange={handleChange} />
+          <Input name="stateCode" label="State Code" value={form.stateCode || ""} onChange={handleChange} />
         </Section>
 
-        {/* SAVE BUTTON */}
-        <div className="flex justify-end">
+        {/* <LocationForm/> */}
+
+        {/* ACTION */}
+        <div className="sticky bottom-0 bg-white border-t pt-4 flex justify-end">
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-60"
+            className="bg-indigo-600 text-white px-8 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-60"
           >
-            {saving ? "Saving..." : "Save Profile"}
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
-
-        {/* IMAGE UPLOADS */}
-        <Section title="Branding & Authorization">
-          <ImageUploadBox
-            label="Company Logo"
-            type="Logo"
-            imageUrl={form.logoUrl}
-            onUpload={(file) => handleUpload("logo", file)}
-          />
-          <ImageUploadBox
-            label="Company Stamp"
-            type="Stamp"
-            imageUrl={form.stampUrl}
-            onUpload={(file) => handleUpload("stamp", file)}
-          />
-          <ImageUploadBox
-            label="Authorized Signature"
-            type="Signature"
-            imageUrl={form.signUrl}
-            onUpload={(file) => handleUpload("sign", file)}
-          />
-        </Section>
 
       </div>
     </CompanyAdminLayout>
@@ -311,11 +155,14 @@ const EditCompanyProfile = () => {
 
 export default EditCompanyProfile;
 
-/* ===================== REUSABLE UI COMPONENTS ===================== */
+
+/* ===================== UI COMPONENTS ===================== */
 
 const Section = ({ title, children }) => (
   <div className="space-y-4">
-    <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
+    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+      {title}
+    </h3>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {children}
     </div>
@@ -327,7 +174,7 @@ const Input = ({ label, ...props }) => (
     <label className="text-xs text-gray-500">{label}</label>
     <input
       {...props}
-      className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+      className="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
     />
   </div>
 );
@@ -338,7 +185,7 @@ const Textarea = ({ label, ...props }) => (
     <textarea
       {...props}
       rows="3"
-      className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+      className="w-full border rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
     />
   </div>
 );

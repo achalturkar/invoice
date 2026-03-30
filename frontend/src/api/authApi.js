@@ -1,8 +1,17 @@
 // src/api/authApi.js
+
+
+const baseUrl = "http://localhost:8080/api"
 export const getLoggedInUser = async () => {
-  const res = await fetch("http://localhost:8080/auth/me", {
+  const token = localStorage.getItem("accessToken");
+
+  if (!token) {
+    throw new Error("No token found");
+  }
+
+  const res = await fetch(`${baseUrl}/auth/me`, {
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -10,5 +19,6 @@ export const getLoggedInUser = async () => {
     throw new Error("Unauthorized");
   }
 
-  return res.json();
+  return await res.json();
 };
+

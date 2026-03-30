@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getCandidates } from "../../../api/candidateApi";
+import { getCandidates } from "../../../api/employeeApi";
 import {
   assignCandidateToProject,
   getCandidatesOfProject

@@ -1,10 +1,12 @@
 package com.cww.invoice.superadmin.service;
 
 
+import com.cww.invoice.company.dto.CompanyResponseDto;
 import com.cww.invoice.company.dto.CreateCompanyRequest;
 import com.cww.invoice.company.dto.CreateCompanyWithAdminRequest;
 import com.cww.invoice.company.entity.Company;
 import com.cww.invoice.company.entity.CompanyStatus;
+import com.cww.invoice.company.mapper.CompanyMapper;
 import com.cww.invoice.company.repository.CompanyRepository;
 import com.cww.invoice.companyadmin.dto.CreateCompanyAdminRequest;
 import com.cww.invoice.user.entity.Role;
@@ -27,12 +29,16 @@ public class SuperAdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<Company> findAllCompanies(){
-        return companyRepository.findAll();
+    public List<CompanyResponseDto> findAllCompanies(){
+        return companyRepository.findAll().stream().map(CompanyMapper::mapToDto).toList();
     }
 
     public Long companiesCount(){
         return companyRepository.count();
+    }
+
+    public void deleteCompany(UUID companyId){
+         companyRepository.deleteById(companyId);
     }
 
     // create company admin

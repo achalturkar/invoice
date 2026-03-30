@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { LogOut, User } from "lucide-react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
+import { getLoggedInUser } from "../../api/authApi";
 
 const ProfileMenu = () => {
   const [open, setOpen] = useState(false);
@@ -9,22 +10,26 @@ const ProfileMenu = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-  // 🔐 Fetch logged-in user
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return;
+  const { setAuth } = useAuth();
 
-    axios
-      .get("http://localhost:8080/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => setUser(res.data))
-      .catch(() => console.log("Failed to load profile"));
+
+  //  Fetch logged-in user
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getLoggedInUser();
+        setUser(data);
+      } catch (error) {
+        console.log("Failed to load profile");
+        logout(); // if token invalid
+      }
+    };
+
+    fetchUser();
   }, []);
 
-  // ❌ Close dropdown on outside click
+
+  //  Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -35,10 +40,9 @@ const ProfileMenu = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const logout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
+
+  const { logout } = useAuth();
+
 
   if (!user) return null;
 
@@ -79,6 +83,7 @@ const ProfileMenu = () => {
             >
               <LogOut size={16} /> Logout
             </button>
+
           </div>
         </div>
       )}

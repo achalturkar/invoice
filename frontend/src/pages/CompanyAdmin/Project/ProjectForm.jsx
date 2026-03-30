@@ -6,11 +6,11 @@ import {
   getProjectById,
   updateProject
 } from "../../../api/projectApi";
+import { useAuth } from "../../../auth/AuthContext";
 
 export default function ProjectForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const companyId = localStorage.getItem("companyId");
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -24,6 +24,9 @@ export default function ProjectForm() {
     budget: "",
     status: "ACTIVE"
   });
+
+  const {auth} = useAuth();
+  const companyId = auth?.companyId;
 
   /* ================= LOAD FOR EDIT ================= */
 

@@ -28,11 +28,11 @@ const SuperAdminNavbar = ({ onMenuClick }) => {
 
         {/* Profile */}
         <div className="flex items-center gap-2 cursor-pointer">
-          {/* <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-semibold">
+          <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-semibold">
             SA
           </div>
           <span className="text-sm font-medium">Super Admin</span>
-          <ChevronDown size={16} /> */}
+          <ChevronDown size={16} />
 
 
         </div>

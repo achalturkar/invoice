@@ -1,27 +1,66 @@
-import React, { useState, useMemo } from "react";
-import { resolveImageUrl } from "../../../utils/imageUtils";
+import React, { useState } from "react";
+import { companyImageUrl } from "../../../utils/companyImageUrl";
+import { API_BASE, getToken } from "../../../config/api";
+import { Camera } from "lucide-react";
 
-const ImageBox = ({ label, url }) => {
-  const finalUrl = useMemo(() => resolveImageUrl(url), [url]);
-  const [error, setError] = useState(false);
+
+const ImageBox = ({ label, companyId, type }) => {
+  const [refresh, setRefresh] = useState(Date.now());
+  const [uploading, setUploading] = useState(false);
+
+  const imageSrc = `${companyImageUrl(companyId, type)}?v=${refresh}`;
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    await fetch(
+      `${API_BASE}/api/company/${companyId}/image/${type}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: formData,
+      }
+    );
+
+    setUploading(false);
+    setRefresh(Date.now()); // force reload
+  };
 
   return (
-    <div className="border rounded-xl p-4 flex flex-col items-center justify-center bg-gray-50">
-      <p className="text-xs text-gray-500 mb-2">{label}</p>
+    <div className="relative bg-white border rounded-xl p-4 flex flex-col items-center gap-3">
+      <p className="text-sm font-semibold text-gray-700">{label}</p>
 
-      {!finalUrl || error ? (
-        <div className="h-32 w-full flex items-center justify-center border border-dashed rounded text-xs text-gray-400 bg-white">
-          No image uploaded
-        </div>
-      ) : (
+      <div className="relative w-32 h-32 border rounded-lg flex items-center justify-center overflow-hidden">
         <img
-          key={finalUrl}
-          src={finalUrl}
+          src={imageSrc}
           alt={label}
-          className="max-h-32 object-contain bg-white p-2 rounded border"
-          loading="lazy"
-          onError={() => setError(true)}
+          className="w-full h-full object-contain"
+          onError={(e) => {
+            e.target.src = "/placeholder-image.jpg";
+          }}
         />
+
+        <label className="absolute bottom-2 right-2 bg-gray-100 text-black text-xs p-2 rounded-full cursor-pointer shadow">
+            <Camera/>
+          <input
+            type="file"
+            className="hidden"
+            onChange={handleUpload}
+            accept="image/png,image/jpeg,image/webp"
+          />
+        </label>
+      </div>
+
+      {uploading && (
+        <p className="text-xs text-gray-400">Uploading...</p>
       )}
     </div>
   );

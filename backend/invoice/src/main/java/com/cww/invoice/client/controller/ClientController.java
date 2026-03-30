@@ -1,7 +1,7 @@
 package com.cww.invoice.client.controller;
 
-import com.cww.invoice.client.dto.ClientRequestDto;
-import com.cww.invoice.client.dto.ClientResponseDto;
+import com.cww.invoice.client.dto.ClientRequestDTO;
+import com.cww.invoice.client.dto.ClientResponseDTO;
 import com.cww.invoice.client.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,20 +17,20 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping
-    public List<ClientResponseDto> getAll(@PathVariable UUID companyId) {
+    public List<ClientResponseDTO> getAll(@PathVariable UUID companyId) {
         return clientService.getAllByCompany(companyId);
     }
 
     @PostMapping
-    public ClientResponseDto create(
+    public ClientResponseDTO create(
             @PathVariable UUID companyId,
-            @RequestBody ClientRequestDto dto
+            @RequestBody ClientRequestDTO dto
     ) {
         return clientService.create(companyId, dto);
     }
 
     @GetMapping("/{id}")
-    public ClientResponseDto getById(
+    public ClientResponseDTO getById(
             @PathVariable UUID companyId,
             @PathVariable UUID id
     ) {
@@ -38,10 +38,10 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ClientResponseDto update(
+    public ClientResponseDTO update(
             @PathVariable UUID companyId,
             @PathVariable UUID id,
-            @RequestBody ClientRequestDto dto
+            @RequestBody ClientRequestDTO dto
     ) {
         return clientService.update(companyId, id, dto);
     }
